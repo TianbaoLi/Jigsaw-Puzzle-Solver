@@ -68,33 +68,32 @@
 
 \begin{abstract}
 
-This paper presents an innotiative way to solve jigsaw puzzle with the help of deep concolutional neural networks. For a simpler processure, we turn the puzzle to a prediction that whether two arbitrary pieces should be adjacent. Compared with traditional solutions, using the feature maps generated from CNN can give a deeper intuition on the correlation between edges, which can improve the puzzle solution.
+This paper presents an innovative way to solve jigsaw puzzle with the help of deep convolutional neural networks. For a simpler procedure, we turn the puzzle to a prediction that whether two arbitrary pieces should be adjacent. Compared with traditional solutions, using the feature maps generated from CNN can give a deeper intuition on the correlation between edges, which can improve the puzzle solution.
 
 \end{abstract}
 
 \section{Introduction}
 
-Jigsaw puzzles were first introduced around 1760 for map research and then became a popular intelligence entertainment \cite{freeman1964apictorial}. The origin image is divied into $N\times M$
-People usually take advantage of image information as edges, such as color, texure, instance, etc., to reconstruct the origin image. However, this problem ahas be proven to be a NP-complete one \cite{altman1989solving,demaine2007jigsaw}.
+Jigsaw puzzles were first introduced around 1760 for map research and then became a popular intelligence entertainment \cite{freeman1964apictorial}. The origin image is divided into $N\times M$. People usually take advantage of image information at edges, such as color, texture, instance, etc., to reconstruct the origin image. However, this problem has be proven to be a NP-complete one \cite{altman1989solving,demaine2007jigsaw}.
 
 \subsection{Problem Definition}
 
-Jigsaw puzzles aims to reshape the $N\times M$ non-overlapping, equal-sized pieces from the origin image to the right arrangement. For the worst case, it takes the complicity of $O((N\times M)!)$.
+Jigsaw puzzles aims to reshape the $N\times M$ non-overlapping, equal-sized pieces from the origin image to the correct arrangement. For the worst case, it takes the complicity of $O((N\times M)!)$.
 
 \subsection{Related Work}
 
-Jigsaw has been researched on for many years. One most basic idea is to evaluate the compability of the adjacent pices and utake a strategy, such as greedy search, to arrange the pieces. One famous work is the Genetic Algorithm (GA) \cite{sholomon2013genetic}. Give initial candidate solutions, oit applies operations like selection, reproduction and mutation based on the color-distance fitness. Similarly but innovatively, \cite{sholomon2016dnn} first introduces deep neural network to jigsaw solver and transforms the puzzle to the piece pair adjacency prediction. It samples piece edges can learn the adjacent likelihood through DNN based on the color distance. For these two solvers, the only use color information to judge whether two pieces should be together. However, human use some others like texture to solve. So, there is still some further steps on it.
+Jigsaw has been researched on for many years. One most basic idea is to evaluate the compatibility of the adjacent pieces and take a strategy, such as greedy search, to arrange the pieces. One famous work is the Genetic Algorithm (GA) \cite{sholomon2013genetic}. Given initial candidate solutions, it applies operations like selection, reproduction and mutation based on the color-distance fitness function. Similarly but innovatively, \cite{sholomon2016dnn} first introduces deep neural network to jigsaw solver and transforms the puzzle to the piece pair adjacency prediction. It samples piece edges to learn the adjacent likelihood through DNN based on the color distance. For these two solvers, they only use color information to judge whether two pieces should be together. However, human use some others like texture to solve. So, there is still some further steps on it.
 
-Recently, with the prosper of convolutional neural networks in computer vision area, it is also a good tool to solve jigsaw puzzles. CNN can extract regional features in many persperctives, such as color, texture, pattern, instance. These can be good inference for adjacent pieces. So, \cite{deryneural,noroozi2016unsupervised} choose to use feature maps from pre-trained CFN \cite{noroozi2016unsupervised} (siamese-ennead AlexNet \cite{krizhevsky2012imagenet}), VGG \cite{he2016deep} or Resnet \cite{simonyan2014very} and predict the location. However, the main problem for these approach is that they hold a siamese structure with shared weights for each location, which means they can only solve a limited number for pieces ($3\times3$ in \cite{noroozi2016unsupervised}, $2\times2$ and $2\times3$ in \cite{deryneural}). With the piece amount increasing, the network becomes extremely to train.
+Recently, with the prosper of convolutional neural networks in computer vision area, CNN also becomes a good tool to solve jigsaw puzzles. CNN can extract regional features in many perspectives, such as color, texture, pattern, instance. These can be good inference for judging adjacent pieces. So, \cite{deryneural,noroozi2016unsupervised} choose to use feature maps from pre-trained CFN \cite{noroozi2016unsupervised} (siamese-ennead AlexNet \cite{krizhevsky2012imagenet}), VGG \cite{he2016deep} or Resnet \cite{simonyan2014very} and predict the location. However, the main problem for these approach is that they hold a siamese structure with shared weights for each location, which means they can only solve a limited number for pieces ($3\times3$ in \cite{noroozi2016unsupervised}, $2\times2$ and $2\times3$ in \cite{deryneural}). With the piece amount increasing, the network becomes extremely heavy to train.
 
 \subsection{Expected Contribuction}
 
-During this project, the main idea is to combine these two approach and solve their problem. Main expected contribuction is as follows:
+During this project, the main idea is to combine these two approach and solve their disadvantages. Main expected contribution is as follows:
 
 \begin{itemize}
-    \item extract features from existing CNN architecture and enhance the adjacency prediction based on \cite{sholomon2016dnn}. There should be improvement on the accuracy.
-    \item apply the adjacency likelihood to current algorithm like GA as the compability measure to improve the performance on large-scaled and obscured images.
-    \item try to find a reinforncement learning way using the adjacency likelihood as a form of reward function. Then the location could be found via policy search.
+    \item extract features from existing CNN architecture and enhance the adjacency prediction in \cite{sholomon2016dnn}. There should be improvement on the accuracy.
+    \item apply the adjacency likelihood to current algorithm like GA as the compatibility measure to improve the performance on large-scaled and obscured images.
+    \item try to find a reinforcement learning way using the adjacency likelihood as a form of reward function. Then the location could be found via policy search.
 \end{itemize}
 
 \bibliographystyle{plain}
