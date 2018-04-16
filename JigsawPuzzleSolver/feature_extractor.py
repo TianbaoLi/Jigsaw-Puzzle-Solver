@@ -102,11 +102,12 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
                 optimizer.zero_grad()
 
                 # forward
-                #outputs = model(inputs)
+                # get ReLU outputs as the feature maps
                 (layer1_out, layer2_out, layer3_out, layer4_out, outputs) = model(inputs)
                 feature_maps = [layer1_out.data.cpu().numpy()[0], layer2_out.data.cpu().numpy()[0], layer3_out.data.cpu().numpy()[0], layer4_out.data.cpu().numpy()[0]]
-                for fmap in feature_maps:
-                    plot_kernels(fmap, int(np.sqrt(fmap.shape[0])))
+                # only use the first block as the low level info
+                first_map = feature_maps[0]
+                plot_kernels(first_map, int(np.sqrt(first_map.shape[0])))
 
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels)
