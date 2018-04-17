@@ -142,15 +142,15 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
 
         layer1_out = self.layer1(x)
-        layer2_out = self.layer2(layer1_out)
-        layer3_out = self.layer3(layer2_out)
-        layer4_out = self.layer4(layer3_out)
+        x = self.layer2(layer1_out)
+        x = self.layer3(x)
+        x = self.layer4(x)
 
-        x = self.avgpool(layer4_out)
+        x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
 
-        return (layer1_out, layer2_out, layer3_out, layer4_out, x)
+        return (layer1_out, x)
 
 
 def resnet18(pretrained=False, **kwargs):

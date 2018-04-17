@@ -44,7 +44,6 @@ class_names = image_datasets['train'].classes
 
 def imshow(inp, title=None):
     """Imshow for Tensor."""
-    print(inp.shape)
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
@@ -107,14 +106,14 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
 
                 # forward
                 # get ReLU outputs as the feature maps
-                (layer1_out, layer2_out, layer3_out, layer4_out, outputs) = model(inputs)
-                feature_maps = [layer1_out.data.cpu().numpy()[0], layer2_out.data.cpu().numpy()[0], layer3_out.data.cpu().numpy()[0], layer4_out.data.cpu().numpy()[0]]
+                (layer1_out, outputs) = model(inputs)
                 # only use the first block as the low level info
-                first_map = feature_maps[0]
+                first_map = layer1_out.data.cpu().numpy()[0]
                 plot_kernels(first_map, int(np.sqrt(first_map.shape[0])))
 
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels)
+
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
@@ -146,7 +145,7 @@ for param in model_conv.parameters():
     param.requires_grad = False
 # Parameters of newly constructed modules have requires_grad=True by default
 num_ftrs = model_conv.fc.in_features
-model_conv.fc = nn.Linear(num_ftrs, 2)
+model_conv.fc = nn.Linear(num_ftrs, len(class_names))
 model_conv = model_conv.cuda()
 criterion = nn.CrossEntropyLoss()
 
