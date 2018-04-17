@@ -15,31 +15,21 @@ import copy
 import resnet_fmap
 
 
-data_transforms = {
-    'train': transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ]),
-    'val': transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ]),
-}
+data_transform = transforms.Compose([
+                transforms.RandomResizedCrop(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+                ])
 
-data_dir = 'ILSVRC2012_img_val/'
-train_dataset = datasets.ImageFolder(data_dir, data_transforms['train'])
-#val_dataset = datasets.ImageFolder(data_dir, data_transforms['val'])
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1, shuffle=True, num_workers=4) for x in ['train']}
-dataset_sizes = {x: len(image_datasets[x]) for x in ['train']}
+data_dir = 'ILSVRC2012_img_val/train'
+image_dataset = datasets.ImageFolder(data_dir, data_transform)
+dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=4, shuffle=True, num_workers=4)
+dataset_size = len(image_dataset)
 #image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
 #dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1, shuffle=True, num_workers=4) for x in ['train', 'val']}
 #dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
-class_names = image_datasets['train'].classes
+class_names = image_dataset.classes
 
 
 def imshow(inp, title=None):
@@ -68,6 +58,26 @@ def plot_kernels(tensor, num_cols=8):
 
     plt.subplots_adjust(wspace=0.1, hspace=0.1)
     plt.show()
+
+
+def gen_feature_map(model):
+    model.train(False)
+    for data in dataloader:
+        # get the inputs
+        inputs, labels = data
+        for input in inputs:
+            input = input[None, :, :]
+            out = torchvision.utils.make_grid(input)
+            imshow(out)
+
+            # wrap them in Variable
+            input = Variable(input.cuda())
+            # get ReLU outputs as the feature maps
+            (layer1_out, output) = model(input)
+            # only use the first block as the low level info
+            first_map = layer1_out.data.cpu().numpy()[0]
+            plot_kernels(first_map, int(np.sqrt(first_map.shape[0])))
+
 
 def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     since = time.time()
@@ -140,7 +150,10 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     return model
 
 
-model_conv = resnet_fmap.resnet34(pretrained=True)
+model_resnet34 = resnet_fmap.resnet34(pretrained=True)
+model_resnet34 = model_resnet34.cuda()
+gen_feature_map(model_resnet34)
+
 for param in model_conv.parameters():
     param.requires_grad = False
 # Parameters of newly constructed modules have requires_grad=True by default
