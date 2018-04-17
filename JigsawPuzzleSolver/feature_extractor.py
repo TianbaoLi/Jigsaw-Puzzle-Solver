@@ -30,22 +30,21 @@ data_transforms = {
     ]),
 }
 
-data_dir = 'ILSVRC2012_img_train'
-train_dir = os.path.join(data_dir, 'train/')
-test_dir = os.path.join(data_dir, 'test/')
-train_dataset = datasets.ImageFolder(train_dir, data_transforms['train'])
-val_dataset = datasets.ImageFolder(test_dir, data_transforms['test'])
-#train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=4)
-#val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=4)
+data_dir = 'ILSVRC2012_img_val/'
+train_dataset = datasets.ImageFolder(data_dir, data_transforms['train'])
+#val_dataset = datasets.ImageFolder(data_dir, data_transforms['val'])
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train']}
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1, shuffle=True, num_workers=4) for x in ['train']}
+dataset_sizes = {x: len(image_datasets[x]) for x in ['train']}
 #image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
-image_datasets = {'train': train_dataset, 'val': val_dataset}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1, shuffle=True, num_workers=4) for x in ['train', 'val']}
-dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
+#dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1, shuffle=True, num_workers=4) for x in ['train', 'val']}
+#dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
 
 
 def imshow(inp, title=None):
     """Imshow for Tensor."""
+    print(inp.shape)
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
@@ -61,8 +60,6 @@ def plot_kernels(tensor, num_cols=8):
     num_kernels = tensor.shape[0]
     num_rows = 1+ num_kernels // num_cols
     fig = plt.figure(figsize=(num_cols,num_rows))
-    i_min = np.min(tensor)
-    i_max = np.max(tensor)
     for i in range(tensor.shape[0]):
         ax1 = fig.add_subplot(num_rows,num_cols,i+1)
         ax1.imshow(tensor[i])
