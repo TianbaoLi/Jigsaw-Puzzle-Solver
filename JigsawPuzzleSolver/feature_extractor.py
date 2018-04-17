@@ -30,8 +30,15 @@ data_transforms = {
     ]),
 }
 
-data_dir = 'hymenoptera_data'
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
+data_dir = 'ILSVRC2012_img_train'
+train_dir = os.path.join(data_dir, 'train/')
+test_dir = os.path.join(data_dir, 'test/')
+train_dataset = datasets.ImageFolder(train_dir, data_transforms['train'])
+val_dataset = datasets.ImageFolder(test_dir, data_transforms['test'])
+#train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=4)
+#val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=True, num_workers=4)
+#image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
+image_datasets = {'train': train_dataset, 'val': val_dataset}
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1, shuffle=True, num_workers=4) for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 class_names = image_datasets['train'].classes
@@ -154,22 +161,3 @@ optimizer_conv = optim.SGD(model_conv.fc.parameters(), lr=0.001, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size=7, gamma=0.1)
 
 model_conv = train_model(model_conv, criterion, optimizer_conv, exp_lr_scheduler, num_epochs=25)
-
-visualize_model(model_conv)
-
-
-
-filters = model_conv.modules()
-body_models = [i for i in model_conv.children()]
-for body in body_models:
-    print(body)
-    if type(body) is nn.modules.container.Sequential:
-        for block in body:
-            tensor = block.relu.weight.data.cpu().numpy()
-            for i in range(len(tensor)):
-                plot_kernels(tensor[i][i].reshape((1, 3, 3)), 3)
-            tensor = block.relu.weight.data.cpu().numpy()
-            for i in range(len(tensor)):
-                plot_kernels(tensor[i][i].reshape((1, 3, 3)), 3)
-
-plt.show()
