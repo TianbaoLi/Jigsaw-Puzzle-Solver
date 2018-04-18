@@ -56,7 +56,7 @@ class JigsawImageLoader(ImageFolder):
         tiles = torch.stack(tiles)
 
 
-        return origin, data, int(order), tiles
+        return origin, data, self.permutations[order], tiles
 
 
     def __retrive_permutations(self, classes):
