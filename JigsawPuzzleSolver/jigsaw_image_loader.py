@@ -8,9 +8,9 @@ from PIL import Image
 
 
 class JigsawImageLoader(ImageFolder):
-    def __init__(self, root):
+    def __init__(self, root, slice=3):
         self.data_path = root
-        self.permutations = self.__retrive_permutations(1000)
+        self.slice = slice
         self.__image_transformer = transforms.Compose([transforms.RandomResizedCrop(224),
                                                         transforms.RandomHorizontalFlip(),
                                                         transforms.ToTensor(),
@@ -33,12 +33,12 @@ class JigsawImageLoader(ImageFolder):
         origin = img
         img = transforms.ToPILImage()(img)
 
-        s = float(img.size[0]) / 3
+        s = float(img.size[0]) / self.slice
         a = s / 2
-        tiles = [None] * 9
-        for n in range(9):
-            i = n // 3
-            j = n % 3
+        tiles = [None] * self.slice ** 2
+        for n in range(self.slice ** 2):
+            i = n // self.slice
+            j = n % self.slice
             c = [a * i * 2 + a, a * j * 2 + a]
             c = np.array([c[1] - a, c[0] - a, c[1] + a + 1, c[0] + a + 1]).astype(int)
             tile = img.crop(c.tolist())
@@ -50,22 +50,12 @@ class JigsawImageLoader(ImageFolder):
             #tile = norm(tile)
             tiles[n] = tile
         
-        order = np.random.randint(len(self.permutations))
-        data = [tiles[self.permutations[order][t]] for t in range(9)]
+        order = np.random.permutation(self.slice ** 2)
+        data = [tiles[order[t]] for t in range(self.slice ** 2)]
         data = torch.stack(data,0)
         tiles = torch.stack(tiles)
 
-
-        return origin, data, self.permutations[order], tiles
-
-
-    def __retrive_permutations(self, classes):
-        all_perm = np.load('permutations_%d.npy' % (classes))
-        # from range [1,9] to [0,8]
-        if all_perm.min() == 1:
-            all_perm = all_perm - 1
-
-        return all_perm
+        return origin, data, order, tiles
 
 
 def rgb_jittering(im):

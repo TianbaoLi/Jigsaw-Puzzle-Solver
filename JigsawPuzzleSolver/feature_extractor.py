@@ -17,7 +17,7 @@ from jigsaw_image_loader import JigsawImageLoader
 
 data_dir = 'ILSVRC2012_img_val/train'
 #image_dataset = datasets.ImageFolder(data_dir, data_transform)
-image_dataset = JigsawImageLoader(data_dir)
+image_dataset = JigsawImageLoader(data_dir, slice=8)
 dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=1, shuffle=True, num_workers=1)
 
 dataset_size = len(image_dataset)
