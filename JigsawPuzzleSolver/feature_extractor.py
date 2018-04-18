@@ -18,7 +18,7 @@ from jigsaw_image_loader import JigsawImageLoader
 data_dir = 'ILSVRC2012_img_val/train'
 #image_dataset = datasets.ImageFolder(data_dir, data_transform)
 image_dataset = JigsawImageLoader(data_dir)
-dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=4, shuffle=True, num_workers=4)
+dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=1, shuffle=True, num_workers=1)
 
 dataset_size = len(image_dataset)
 #image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
@@ -85,12 +85,16 @@ def gen_feature_map(model):
     model.train(False)
     for data in dataloader:
         # get the inputs
-        jigsaws, orders, tiles = data
+        origins, jigsaws, orders, tiles = data
         batch_size = jigsaws.shape[0]
         for i in range(batch_size):
+            origin = origins[i]
             jigsaw = jigsaws[i]
             order_index = orders[i]
-            plot_jigsaw(jigsaw)
+            tile = tiles[i]
+            imshow(origin)
+            #plot_jigsaw(jigsaw)
+            plot_jigsaw(tile)
 
             for tile in jigsaw:
                 input = tile[None, :, :]

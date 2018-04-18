@@ -17,7 +17,7 @@ class JigsawImageLoader(ImageFolder):
                                                         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
                                                         ])
         self.__augment_tile = transforms.Compose([
-                    transforms.RandomCrop(56),
+                    transforms.RandomCrop(64),
                     #transforms.Resize((75,75),Image.BILINEAR),
                     transforms.Lambda(rgb_jittering),
                     transforms.ToTensor(),
@@ -28,9 +28,7 @@ class JigsawImageLoader(ImageFolder):
 
     def __getitem__(self, index):
         img, target = ImageFolder.__getitem__(self, index)
-
-        #if np.random.rand()<0.30:
-        #    img = img.convert('LA').convert('RGB')
+        img = transforms.RandomCrop(224)(img)
 
         s = float(img.size[0])/3
         a = s/2
@@ -52,8 +50,8 @@ class JigsawImageLoader(ImageFolder):
         order = np.random.randint(len(self.permutations))
         data = [tiles[self.permutations[order][t]] for t in range(9)]
         data = torch.stack(data,0)
-        
-        return data, int(order), tiles
+        tiles = torch.stack(tiles)
+        return transforms.ToTensor()(img), data, int(order), tiles
 
 
     def __retrive_permutations(self, classes):
