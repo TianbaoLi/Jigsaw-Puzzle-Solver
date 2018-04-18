@@ -27,28 +27,22 @@ dataset_size = len(image_dataset)
 class_names = image_dataset.classes
 
 
-def imshow(inp, title=None):
-    """Imshow for Tensor."""
-    inp = inp.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
-    plt.imshow(inp)
-    if title is not None:
-        plt.title(title)
-    plt.pause(0.001)  # pause a bit so that plots are updated
-
 
 def back_transform(tensor):
     inp = tensor.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
+    #mean = np.array([0.485, 0.456, 0.406])
+    #std = np.array([0.229, 0.224, 0.225])
+    #inp = std * inp + mean
+    #inp = np.clip(inp, 0, 1)
 
     return inp
 
+
+def imshow(inp, title=None):
+    plt.imshow(back_transform(inp))
+    plt.axis('off')
+    if title is not None:
+        plt.title(title)
 
 def plot_kernels(tensor, num_cols=8):
     num_kernels = tensor.shape[0]
@@ -56,7 +50,7 @@ def plot_kernels(tensor, num_cols=8):
     fig = plt.figure(figsize=(num_cols,num_rows))
     for i in range(tensor.shape[0]):
         ax1 = fig.add_subplot(num_rows,num_cols,i+1)
-        ax1.imshow(back_transform(tensor[i]))
+        ax1.imshow(tensor[i])
         ax1.axis('off')
         ax1.set_xticklabels([])
         ax1.set_yticklabels([])
@@ -93,8 +87,8 @@ def gen_feature_map(model):
             order_index = orders[i]
             tile = tiles[i]
             imshow(origin)
-            #plot_jigsaw(jigsaw)
-            plot_jigsaw(tile)
+            plot_jigsaw(jigsaw)
+            #plot_jigsaw(tile)
 
             for tile in jigsaw:
                 input = tile[None, :, :]
