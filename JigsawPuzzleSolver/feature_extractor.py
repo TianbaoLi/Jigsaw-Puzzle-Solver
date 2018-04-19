@@ -15,9 +15,10 @@ import copy
 import resnet_fmap
 from jigsaw_image_loader import JigsawImageLoader
 
+SLICE_EACH_EDGE = 4
 data_dir = 'ILSVRC2012_img_val/train'
 #image_dataset = datasets.ImageFolder(data_dir, data_transform)
-image_dataset = JigsawImageLoader(data_dir, slice=3)
+image_dataset = JigsawImageLoader(data_dir, slice=SLICE_EACH_EDGE)
 dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=4, shuffle=True, num_workers=4)
 
 dataset_size = len(image_dataset)
@@ -86,16 +87,14 @@ def gen_feature_map(model):
             jigsaw = jigsaws[i]
             order_index = orders[i]
             tile = tiles[i]
-            imshow(origin)
-            plot_jigsaw(jigsaw)
-            #plot_jigsaw(tile)
-            slice_length = tile[0].shape[1]
+            #imshow(origin)
+            #plot_jigsaw(jigsaw)
 
             # store the edge feature map of all tiles
             # dim1: index of tiles
             # dim2: direction: up, down, left, right
-            # dim3: tile length * 64 (ReLU1 output maps) * 2 (use 2 rows near the edge)
-            fmp = torch.zeros(9, 4, slice_length * 64 * 2)
+            # dim3: 64 (ReLU1 output maps) * 56 (ReLU output edge length) * 2 (use 2 rows near the edge)
+            feature_map = torch.zeros(SLICE_EACH_EDGE ** 2, 4, 64 * 56 * 2)
 
             for i in range(jigsaw.shape[0]):
                 tile = jigsaw[i]
@@ -109,7 +108,17 @@ def gen_feature_map(model):
                 # get ReLU outputs as the feature maps
                 (layer1_out, output) = model(input)
                 # only use the first block as the low level info
-                first_map = layer1_out.data.cpu().numpy()[0]
+                first_map = layer1_out.data[0]
+                # generate the edge feature map of each tile of up(0), down(1), left(2), right(3)
+                # fill each filter
+                for j in range(64):
+                    feature_map[int(index)][0][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][0], first_map[j][1]), 0).view(1, -1)
+                    feature_map[int(index)][1][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][-2], first_map[j][-1]), 0).view(1, -1)
+                    feature_map[int(index)][2][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][:, 0], first_map[j][:, 1]), 0).view(1, -1)
+                    feature_map[int(index)][3][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][:, -2], first_map[j][:, -1]), 0).view(1, -1)
+
+                first_map = first_map.cpu().numpy()
+                print(feature_map[int(index)])
                 plot_kernels(first_map, int(np.sqrt(first_map.shape[0])))
 
 
