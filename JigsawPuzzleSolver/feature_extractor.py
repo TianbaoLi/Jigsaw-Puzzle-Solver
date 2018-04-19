@@ -15,18 +15,8 @@ import copy
 import resnet_fmap
 from jigsaw_image_loader import JigsawImageLoader
 
-SLICE_EACH_EDGE = 4
+
 data_dir = 'ILSVRC2012_img_val/train'
-#image_dataset = datasets.ImageFolder(data_dir, data_transform)
-image_dataset = JigsawImageLoader(data_dir, slice=SLICE_EACH_EDGE)
-dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=4, shuffle=True, num_workers=4)
-
-dataset_size = len(image_dataset)
-#image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
-#dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1, shuffle=True, num_workers=4) for x in ['train', 'val']}
-#dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
-class_names = image_dataset.classes
-
 
 
 def back_transform(tensor):
@@ -76,17 +66,28 @@ def plot_jigsaw(tensor):
     plt.show()
 
 
-def gen_feature_map(model):
+def gen_feature_map(dataloader, model, slice_per_edge=3, data_amount=100): # data_amount for both true and false
     model.train(False)
+    neighbor = torch.zeros(data_amount, 2 * 64 * 56 * 2 + 1)
+    neighbor_count = 0
+    non_neighbor = torch.zeros(data_amount, 2 * 64 * 56 * 2 + 1)
+    non_neighbor_count = 0
+
     for data in dataloader:
+        if neighbor_count >= data_amount and non_neighbor_count >= data_amount:
+            break
+
         # get the inputs
         origins, jigsaws, orders, tiles = data
         batch_size = jigsaws.shape[0]
-        for i in range(batch_size):
-            origin = origins[i]
-            jigsaw = jigsaws[i]
-            order_index = orders[i]
-            tile = tiles[i]
+        for b in range(batch_size):
+            if neighbor_count >= data_amount and non_neighbor_count >= data_amount:
+                break
+
+            origin = origins[b]
+            jigsaw = jigsaws[b]
+            order_index = orders[b]
+            tile = tiles[b]
             #imshow(origin)
             #plot_jigsaw(jigsaw)
 
@@ -94,14 +95,14 @@ def gen_feature_map(model):
             # dim1: index of tiles
             # dim2: direction: up, down, left, right
             # dim3: 64 (ReLU1 output maps) * 56 (ReLU output edge length) * 2 (use 2 rows near the edge)
-            feature_map = torch.zeros(SLICE_EACH_EDGE ** 2, 4, 64 * 56 * 2)
+            feature_map = torch.zeros(slice_per_edge ** 2, 4, 64 * 56 * 2)
 
             for i in range(jigsaw.shape[0]):
                 tile = jigsaw[i]
                 index = order_index[i]
                 input = tile[None, :, :]
                 out = torchvision.utils.make_grid(input)
-                imshow(out)
+                #imshow(out)
 
                 # wrap them in Variable
                 input = Variable(input.cuda())
@@ -118,10 +119,58 @@ def gen_feature_map(model):
                     feature_map[int(index)][3][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][:, -2], first_map[j][:, -1]), 0).view(1, -1)
 
                 first_map = first_map.cpu().numpy()
-                print(feature_map[int(index)])
-                plot_kernels(first_map, int(np.sqrt(first_map.shape[0])))
+                #plot_kernels(first_map, int(np.sqrt(first_map.shape[0])))
+
+            for i in range(feature_map.shape[0]):
+                for j in range(feature_map.shape[0]):
+                    if i >= j:
+                        continue
+                    if neighbor_count >= data_amount and non_neighbor_count >= data_amount:
+                        break
+                    if j - i == 1 and neighbor_count < data_amount:
+                        neighbor[neighbor_count][0: 64 * 56 * 2] = feature_map[i][3]
+                        neighbor[neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][2]
+                        neighbor[neighbor_count][-1] = 1
+                        neighbor_count += 1
+                    elif j - i == slice_per_edge and neighbor_count < data_amount:
+                        neighbor[neighbor_count][0: 64 * 56 * 2] = feature_map[i][1]
+                        neighbor[neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][0]
+                        neighbor[neighbor_count][-1] = 1
+                        neighbor_count += 1
+                    elif non_neighbor_count < data_amount:
+                        non_neighbor[non_neighbor_count][0: 64 * 56 * 2] = feature_map[i][3]
+                        non_neighbor[non_neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][2]
+                        non_neighbor[non_neighbor_count][-1] = 0
+                        non_neighbor_count += 1
+
+                        if non_neighbor_count >= data_amount:
+                            break
+
+                        non_neighbor[non_neighbor_count][0: 64 * 56 * 2] = feature_map[i][1]
+                        non_neighbor[non_neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][0]
+                        non_neighbor[non_neighbor_count][-1] = 0
+                        non_neighbor_count += 1
+
+    feature_data = torch.cat((neighbor, non_neighbor), 0)
+    torch.save(feature_data, 'EdgeFeatures_' + str(slice_per_edge) + '_' + str(data_amount))
+    return feature_data
 
 
-model_resnet34 = resnet_fmap.resnet34(pretrained=True)
-model_resnet34 = model_resnet34.cuda()
-gen_feature_map(model_resnet34)
+def main():
+    SLICE_PER_EDGE = 3
+    DATA_AMOUNT = 100
+    BATCH_SIZE = 4
+    WORKER_THREAD = 4
+
+    image_dataset = JigsawImageLoader(data_dir, slice=SLICE_PER_EDGE)
+    dataloader = torch.utils.data.DataLoader(image_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=WORKER_THREAD)
+
+    model_resnet34 = resnet_fmap.resnet34(pretrained=True)
+    model_resnet34 = model_resnet34.cuda()
+
+    feature_data = gen_feature_map(dataloader, model_resnet34, slice_per_edge=SLICE_PER_EDGE, data_amount=DATA_AMOUNT)
+    print(feature_data)
+
+
+if __name__ == '__main__':
+    main()
