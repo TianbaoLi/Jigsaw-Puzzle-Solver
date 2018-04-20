@@ -18,14 +18,12 @@ class BuddyNet(nn.Module):
         self.fc2 = nn.Linear(2 * 56 * 64, 2 * 28 * 32)
         self.fc3 = nn.Linear(2 * 28 * 32, 2 * 14 * 16)
         self.fc4 = nn.Linear(2 * 14 * 16, 2)
-        self.fc5 = nn.Linear(2, 1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = self.fc5(x)
+        x = self.fc4(x)
 
         return x
 
@@ -58,15 +56,18 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
 
                 # wrap them in Variable
                 inputs = Variable(inputs.cuda())
-                labels = Variable(labels.cuda())
+                labels = Variable(labels.long().cuda())
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
                 # forward
                 outputs = model(inputs)
+                print(outputs)
                 _, preds = torch.max(outputs.data, 1)
-                loss = criterion(outputs, labels)
+                print(preds.float())
+                print(labels)
+                loss = criterion(preds.float(), labels)
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
@@ -110,7 +111,7 @@ def LoadData(path, ratio=0.2):
     y_train = train[:, -1]
     x_val = val[:, : -1]
     y_val = val[:, -1]
-    return x_train.cuda(), y_train.cuda(), x_val.cuda(), y_val.cuda()
+    return x_train, y_train, x_val, y_val
 
 
 def main():
