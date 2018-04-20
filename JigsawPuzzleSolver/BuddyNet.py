@@ -56,18 +56,15 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
 
                 # wrap them in Variable
                 inputs = Variable(inputs.cuda())
-                labels = Variable(labels.long().cuda())
+                labels = Variable(labels.cuda())
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
                 # forward
                 outputs = model(inputs)
-                print(outputs)
                 _, preds = torch.max(outputs.data, 1)
-                print(preds.float())
-                print(labels)
-                loss = criterion(preds.float(), labels)
+                loss = criterion(outputs, labels)
 
                 # backward + optimize only if in training phase
                 if phase == 'train':
@@ -108,9 +105,17 @@ def LoadData(path, ratio=0.2):
     train = feature_data[: int(N * (1 - ratio))]
     val = feature_data[int(N * (1 - ratio)):]
     x_train = train[:, : -1]
-    y_train = train[:, -1]
+    y_train = train[:, -1].long()
+    #y_train = torch.zeros(x_train.shape[0], 2, dtype=torch.int64)
+    #for i in range(y.shape[0]):
+    #    y_train[i][y[i]] = 1
+
     x_val = val[:, : -1]
-    y_val = val[:, -1]
+    y_val = val[:, -1].long()
+    #y_val = torch.zeros(x_val.shape[0], 2, dtype=torch.int64)
+    #for i in range(y.shape[0]):
+    #    y_val[i][y[i]] = 1
+
     return x_train, y_train, x_val, y_val
 
 
