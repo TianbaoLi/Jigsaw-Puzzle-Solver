@@ -1,7 +1,7 @@
 import numpy as np
 import torchvision.transforms as transforms
 import torch
-from torchvision.datasets.folder import ImageFolder, default_loader, IMG_EXTENSIONS
+from torchvision.datasets.folder import ImageFolder, default_loader
 
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -24,12 +24,13 @@ class JigsawImageLoader(ImageFolder):
                     #transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          #std =[0.229, 0.224, 0.225])
                                          ])
-        super(JigsawImageLoader, self).__init__(root, default_loader, IMG_EXTENSIONS)
+        super(JigsawImageLoader, self).__init__(root, loader=default_loader, transform=self.__image_transformer)
+
 
     def __getitem__(self, index):
         img, target = ImageFolder.__getitem__(self, index)
 
-        img = self.__image_transformer(img)
+        #img = self.__image_transformer(img)
         origin = img
         img = transforms.ToPILImage()(img)
 

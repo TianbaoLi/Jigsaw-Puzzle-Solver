@@ -158,7 +158,7 @@ def gen_feature_map(dataloader, model, slice_per_edge=3, data_amount=100): # dat
 
 def main():
     SLICE_PER_EDGE = 3
-    DATA_AMOUNT = 100
+    DATA_AMOUNT = 1000
     BATCH_SIZE = 4
     WORKER_THREAD = 4
 
