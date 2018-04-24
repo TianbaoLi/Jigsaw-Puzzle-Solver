@@ -12,11 +12,17 @@ import matplotlib.pyplot as plt
 import time
 import os
 import copy
+import argparse
 import resnet_fmap
 from jigsaw_image_loader import JigsawImageLoader
 
 
 data_dir = 'ILSVRC2012_img_val/train'
+
+parser = argparse.ArgumentParser(description='Extract ReLU1 features from pre-trained RestNet-34')
+parser.add_argument('--slice', default=3, type=int, help='slice per edge')
+parser.add_argument('--amount', default=1000, type=int, help='amount tile pairs for each class (neighbor/ non-neighbor')
+parser.add_argument('--batch', default=16, type=int, help='batch size')
 
 
 def back_transform(tensor):
@@ -157,9 +163,10 @@ def gen_feature_map(dataloader, model, slice_per_edge=3, data_amount=100): # dat
 
 
 def main():
-    SLICE_PER_EDGE = 3
-    DATA_AMOUNT = 1000
-    BATCH_SIZE = 4
+    args = parser.parse_args()
+    SLICE_PER_EDGE = args.slice
+    DATA_AMOUNT = args.amount
+    BATCH_SIZE = args.batch
     WORKER_THREAD = 4
 
     image_dataset = JigsawImageLoader(data_dir, slice=SLICE_PER_EDGE)

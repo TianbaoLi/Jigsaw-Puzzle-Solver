@@ -7,6 +7,13 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset
 import time
 import copy
+import argparse
+
+
+parser = argparse.ArgumentParser(description='Train Jigsaw Puzzle Solver')
+parser.add_argument('data', type=str, help='Path to feature file')
+parser.add_argument('--epochs', default=30, type=int, help='number of total epochs for training')
+parser.add_argument('--batch', default=16, type=int, help='batch size')
 
 
 class BuddyNet(nn.Module):
@@ -120,12 +127,13 @@ def LoadData(path, ratio=0.2):
 
 
 def main():
-    DATA_DIR = 'EdgeFeatures_3_1000'
+    args = parser.parse_args()
+    DATA = args.data
 
-    (x_train, y_train, x_val, y_val) = LoadData(DATA_DIR)
+    (x_train, y_train, x_val, y_val) = LoadData(DATA)
     datasets = {'train': TensorDataset(x_train, y_train),
                 'val': TensorDataset(x_val, y_val)}
-    dataloaders = {x: torch.utils.data.DataLoader(datasets[x], batch_size=4, shuffle=True, num_workers=4) for x in ['train', 'val']}
+    dataloaders = {x: torch.utils.data.DataLoader(datasets[x], batch_size=args.batch, shuffle=True, num_workers=4) for x in ['train', 'val']}
     dataset_sizes = {x: len(datasets[x]) for x in ['train', 'val']}
 
     net = BuddyNet()
@@ -135,7 +143,7 @@ def main():
     # Decay LR by a factor of 0.1 every 7 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
-    model_conv = train_model(net, dataloaders, dataset_sizes, criterion, optimizer, exp_lr_scheduler, num_epochs=25)
+    model_conv = train_model(net, dataloaders, dataset_sizes, criterion, optimizer, exp_lr_scheduler, args.epochs)
 
 
 if __name__ == '__main__':
