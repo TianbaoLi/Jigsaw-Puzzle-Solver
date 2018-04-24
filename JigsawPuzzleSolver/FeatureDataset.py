@@ -24,7 +24,7 @@ class FeatureDatasetGenerator:
         self.file_list = [file for file in os.listdir(dir)]
         sort(self.file_list)
 
-    def generate(self, ratio=0.2):
+    def generate(self, ratio=0.8):
         data_len = len(self.file_list)
         train_dataset = FeatureDataset(self.dir, self.file_list[ : int(ratio * data_len)])
         val_dataset = FeatureDataset(self.dir, self.file_list[int(ratio * data_len) : ])

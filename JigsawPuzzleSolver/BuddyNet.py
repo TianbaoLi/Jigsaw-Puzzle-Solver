@@ -23,25 +23,22 @@ class BuddyNet(nn.Module):
     def __init__(self):
         super(BuddyNet, self).__init__()
         # fcs
-        #self.fc1 = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2 * 56 * 64 + 224 * 2 * 3)
-        #self.fc2 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 56 * 64 + 224 * 2 * 3)
-        #self.fc3 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 28 * 32 + 224 * 3)
-        #self.fc4 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 28 * 32 + 224 * 3)
-        #self.fc5 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 14 * 16 + 224)
-        #self.fc6 = nn.Linear(2 * 14 * 16 + 224, 2 * 14 * 16 + 224)
-        #self.fc7 = nn.Linear(2 * 14 * 16 + 224, 2)
-        self.fc = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2)
+        self.fc1 = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2 * 56 * 64 + 224 * 2 * 3)
+        self.fc2 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 56 * 64 + 224 * 2 * 3)
+        self.fc3 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 28 * 32 + 224 * 3)
+        self.fc4 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 28 * 32 + 224 * 3)
+        self.fc5 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 14 * 16 + 224)
+        self.fc6 = nn.Linear(2 * 14 * 16 + 224, 2 * 14 * 16 + 224)
+        self.fc7 = nn.Linear(2 * 14 * 16 + 224, 2)
 
     def forward(self, x):
-        #x = F.relu(self.fc1(x))
-        #x = F.relu(self.fc2(x))
-        #x = F.relu(self.fc3(x))
-        #x = F.relu(self.fc4(x))
-        #x = F.relu(self.fc5(x))
-        #x = F.relu(self.fc6(x))
-        #x = self.fc7(x)
-
-        x = self.fc(x)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = F.relu(self.fc6(x))
+        x = self.fc7(x)
 
         return x
 
@@ -66,8 +63,10 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
 
             running_loss = 0.0
             running_corrects = 0
+            item_amount = 0
 
             # Iterate over data.
+
             for tile in dataloaders[phase]:
                 tile_inputs, tile_labels = tile
                 item_amount = tile_inputs.shape[1]
@@ -97,8 +96,8 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
                     running_loss += loss.data[0] * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
 
-            epoch_loss = running_loss / dataset_sizes[phase]
-            epoch_acc = running_corrects / dataset_sizes[phase]
+            epoch_loss = running_loss / (dataset_sizes[phase] * item_amount)
+            epoch_acc = int(running_corrects) / (dataset_sizes[phase] * item_amount)
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
