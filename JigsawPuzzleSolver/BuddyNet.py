@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser(description='Train Jigsaw Puzzle Solver')
 parser.add_argument('data', type=str, help='Path to feature file')
 parser.add_argument('--epochs', default=30, type=int, help='number of total epochs for training')
 parser.add_argument('--batch', default=16, type=int, help='batch size')
+parser.add_argument('--lr', default=0.01, type=float, help='learning rate for SGD optimizer')
 
 
 class BuddyNet(nn.Module):
@@ -145,7 +146,7 @@ def main():
     net = BuddyNet()
     net = net.cuda()
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9)
     # Decay LR by a factor of 0.1 every 7 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
