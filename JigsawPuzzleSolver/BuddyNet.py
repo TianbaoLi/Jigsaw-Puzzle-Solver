@@ -8,6 +8,7 @@ from torch.utils.data import TensorDataset
 import time
 import copy
 import argparse
+from FeatureDataset import FeatureDataset, FeatureDatasetGenerator
 
 
 parser = argparse.ArgumentParser(description='Train Jigsaw Puzzle Solver')
@@ -22,22 +23,25 @@ class BuddyNet(nn.Module):
     def __init__(self):
         super(BuddyNet, self).__init__()
         # fcs
-        self.fc1 = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2 * 56 * 64 + 224 * 2 * 3)
-        self.fc2 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 56 * 64 + 224 * 2 * 3)
-        self.fc3 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 28 * 32 + 224 * 3)
-        self.fc4 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 28 * 32 + 224 * 3)
-        self.fc5 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 14 * 16 + 224)
-        self.fc6 = nn.Linear(2 * 14 * 16 + 224, 2 * 14 * 16 + 224)
-        self.fc7 = nn.Linear(2 * 14 * 16 + 224, 2)
+        #self.fc1 = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2 * 56 * 64 + 224 * 2 * 3)
+        #self.fc2 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 56 * 64 + 224 * 2 * 3)
+        #self.fc3 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 28 * 32 + 224 * 3)
+        #self.fc4 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 28 * 32 + 224 * 3)
+        #self.fc5 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 14 * 16 + 224)
+        #self.fc6 = nn.Linear(2 * 14 * 16 + 224, 2 * 14 * 16 + 224)
+        #self.fc7 = nn.Linear(2 * 14 * 16 + 224, 2)
+        self.fc = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = F.relu(self.fc5(x))
-        x = F.relu(self.fc6(x))
-        x = self.fc7(x)
+        #x = F.relu(self.fc1(x))
+        #x = F.relu(self.fc2(x))
+        #x = F.relu(self.fc3(x))
+        #x = F.relu(self.fc4(x))
+        #x = F.relu(self.fc5(x))
+        #x = F.relu(self.fc6(x))
+        #x = self.fc7(x)
+
+        x = self.fc(x)
 
         return x
 
@@ -64,30 +68,34 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
             running_corrects = 0
 
             # Iterate over data.
-            for data in dataloaders[phase]:
-                # get the inputs
-                inputs, labels = data
+            for tile in dataloaders[phase]:
+                tile_inputs, tile_labels = tile
+                item_amount = tile_inputs.shape[1]
+                for i in range(item_amount):
+                    # get the inputs
+                    inputs = tile_inputs[:, i, :]
+                    labels = tile_labels[:, i]
 
-                # wrap them in Variable
-                inputs = Variable(inputs.cuda())
-                labels = Variable(labels.cuda())
+                    # wrap them in Variable
+                    inputs = Variable(inputs.cuda())
+                    labels = Variable(labels.long().cuda())
 
-                # zero the parameter gradients
-                optimizer.zero_grad()
+                    # zero the parameter gradients
+                    optimizer.zero_grad()
 
-                # forward
-                outputs = model(inputs)
-                _, preds = torch.max(outputs.data, 1)
-                loss = criterion(outputs, labels)
+                    # forward
+                    outputs = model(inputs)
+                    _, preds = torch.max(outputs.data, 1)
+                    loss = criterion(outputs, labels)
 
-                # backward + optimize only if in training phase
-                if phase == 'train':
-                    loss.backward()
-                    optimizer.step()
+                    # backward + optimize only if in training phase
+                    if phase == 'train':
+                        loss.backward()
+                        optimizer.step()
 
-                # statistics
-                running_loss += loss.data[0] * inputs.size(0)
-                running_corrects += torch.sum(preds == labels.data)
+                    # statistics
+                    running_loss += loss.data[0] * inputs.size(0)
+                    running_corrects += torch.sum(preds == labels.data)
 
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects / dataset_sizes[phase]
@@ -112,6 +120,7 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
     return model
 
 
+'''
 def LoadData(path, ratio=0.2):
     feature_data = torch.load(path)
     N = int(feature_data.shape[0])
@@ -131,15 +140,21 @@ def LoadData(path, ratio=0.2):
     #    y_val[i][y[i]] = 1
 
     return x_train, y_train, x_val, y_val
+'''
 
 
 def main():
     args = parser.parse_args()
     DATA = args.data
 
-    (x_train, y_train, x_val, y_val) = LoadData(DATA)
-    datasets = {'train': TensorDataset(x_train, y_train),
-                'val': TensorDataset(x_val, y_val)}
+    #(x_train, y_train, x_val, y_val) = LoadData(DATA)
+    #datasets = {'train': TensorDataset(x_train, y_train),
+    #            'val': TensorDataset(x_val, y_val)}
+
+    generator = FeatureDatasetGenerator(DATA)
+    train_dataset, val_dataset = generator.generate()
+    datasets = {'train': train_dataset, 'val': val_dataset}
+
     dataloaders = {x: torch.utils.data.DataLoader(datasets[x], batch_size=args.batch, shuffle=True, num_workers=4) for x in ['train', 'val']}
     dataset_sizes = {x: len(datasets[x]) for x in ['train', 'val']}
 
