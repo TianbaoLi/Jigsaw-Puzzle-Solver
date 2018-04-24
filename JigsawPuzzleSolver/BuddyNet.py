@@ -22,13 +22,13 @@ class BuddyNet(nn.Module):
     def __init__(self):
         super(BuddyNet, self).__init__()
         # fcs
-        self.fc1 = nn.Linear(2 * 2 * 56 * 64, 2 * 56 * 64)
-        self.fc2 = nn.Linear(2 * 56 * 64, 2 * 56 * 64)
-        self.fc3 = nn.Linear(2 * 56 * 64, 2 * 28 * 32)
-        self.fc4 = nn.Linear(2 * 28 * 32, 2 * 28 * 32)
-        self.fc5 = nn.Linear(2 * 28 * 32, 2 * 14 * 16)
-        self.fc6 = nn.Linear(2 * 14 * 16, 2 * 14 * 16)
-        self.fc7 = nn.Linear(2 * 14 * 16, 2)
+        self.fc1 = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2 * 56 * 64 + 224 * 2 * 3)
+        self.fc2 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 56 * 64 + 224 * 2 * 3)
+        self.fc3 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 28 * 32 + 224 * 3)
+        self.fc4 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 28 * 32 + 224 * 3)
+        self.fc5 = nn.Linear(2 * 28 * 32 + 224 * 3, 2 * 14 * 16 + 224)
+        self.fc6 = nn.Linear(2 * 14 * 16 + 224, 2 * 14 * 16 + 224)
+        self.fc7 = nn.Linear(2 * 14 * 16 + 224, 2)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))

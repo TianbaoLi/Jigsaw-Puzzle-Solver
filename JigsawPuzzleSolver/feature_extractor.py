@@ -74,9 +74,9 @@ def plot_jigsaw(tensor):
 
 def gen_feature_map(dataloader, model, slice_per_edge=3, data_amount=100): # data_amount for both true and false
     model.train(False)
-    neighbor = torch.zeros(data_amount, 2 * 64 * 56 * 2 + 1)
+    neighbor = torch.zeros(data_amount, 2 * 64 * 56 * 2 + 224 * 2 * 3 * 2 + 1)
     neighbor_count = 0
-    non_neighbor = torch.zeros(data_amount, 2 * 64 * 56 * 2 + 1)
+    non_neighbor = torch.zeros(data_amount, 2 * 64 * 56 * 2 + 224 * 2 * 3 * 2 + 1)
     non_neighbor_count = 0
 
     for data in dataloader:
@@ -100,8 +100,10 @@ def gen_feature_map(dataloader, model, slice_per_edge=3, data_amount=100): # dat
             # store the edge feature map of all tiles
             # dim1: index of tiles
             # dim2: direction: up, down, left, right
-            # dim3: 64 (ReLU1 output maps) * 56 (ReLU output edge length) * 2 (use 2 rows near the edge)
-            feature_map = torch.zeros(slice_per_edge ** 2, 4, 64 * 56 * 2)
+            # dim3:
+            #   feature map: 64 (ReLU1 output maps) * 56 (ReLU output edge length) * 2 (use 2 rows near the edge)
+            #   color: 224 (tile edge length) * 2 (use 2 rows near the edge) * 3 (RGB)
+            feature_map = torch.zeros(slice_per_edge ** 2, 4, 64 * 56 * 2 + 224 * 2 * 3)
 
             for i in range(jigsaw.shape[0]):
                 tile = jigsaw[i]
@@ -123,6 +125,11 @@ def gen_feature_map(dataloader, model, slice_per_edge=3, data_amount=100): # dat
                     feature_map[int(index)][1][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][-2], first_map[j][-1]), 0).view(1, -1)
                     feature_map[int(index)][2][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][:, 0], first_map[j][:, 1]), 0).view(1, -1)
                     feature_map[int(index)][3][j * 56 * 2: j * 56 * 2 + 56 * 2] = torch.cat((first_map[j][:, -2], first_map[j][:, -1]), 0).view(1, -1)
+                # fill RGB info
+                feature_map[int(index)][0][64 * 56 * 2: 64 * 56 * 2 + 224 * 2 * 3] = torch.cat((tile[:, 0], tile[:, 1]), 0).view(1, -1)
+                feature_map[int(index)][1][64 * 56 * 2: 64 * 56 * 2 + 224 * 2 * 3] = torch.cat((tile[:, -2], tile[:, -1]), 0).view(1, -1)
+                feature_map[int(index)][2][64 * 56 * 2: 64 * 56 * 2 + 224 * 2 * 3] = torch.cat((tile[:, :, 0], tile[:, :, 1]), 0).view(1, -1)
+                feature_map[int(index)][3][64 * 56 * 2: 64 * 56 * 2 + 224 * 2 * 3] = torch.cat((tile[:, :, -2], tile[:, :, -1]), 0).view(1, -1)
 
                 first_map = first_map.cpu().numpy()
                 #plot_kernels(first_map, int(np.sqrt(first_map.shape[0])))
@@ -134,26 +141,26 @@ def gen_feature_map(dataloader, model, slice_per_edge=3, data_amount=100): # dat
                     if neighbor_count >= data_amount and non_neighbor_count >= data_amount:
                         break
                     if j - i == 1 and neighbor_count < data_amount:
-                        neighbor[neighbor_count][0: 64 * 56 * 2] = feature_map[i][3]
-                        neighbor[neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][2]
+                        neighbor[neighbor_count][0: 64 * 56 * 2 + 224 * 2 * 3] = feature_map[i][3]
+                        neighbor[neighbor_count][64 * 56 * 2 + 224 * 2 * 3: 64 * 56 * 2 + 224 * 2 * 3 + 64 * 56 * 2 + 224 * 2 * 3] = feature_map[j][2]
                         neighbor[neighbor_count][-1] = 1
                         neighbor_count += 1
                     elif j - i == slice_per_edge and neighbor_count < data_amount:
-                        neighbor[neighbor_count][0: 64 * 56 * 2] = feature_map[i][1]
-                        neighbor[neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][0]
+                        neighbor[neighbor_count][0: 64 * 56 * 2 + 224 * 2 * 3] = feature_map[i][1]
+                        neighbor[neighbor_count][64 * 56 * 2 + 224 * 2 * 3: 64 * 56 * 2 + 224 * 2 * 3 + 64 * 56 * 2 + 224 * 2 * 3] = feature_map[j][0]
                         neighbor[neighbor_count][-1] = 1
                         neighbor_count += 1
                     elif non_neighbor_count < data_amount:
-                        non_neighbor[non_neighbor_count][0: 64 * 56 * 2] = feature_map[i][3]
-                        non_neighbor[non_neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][2]
+                        non_neighbor[non_neighbor_count][0: 64 * 56 * 2 + 224 * 2 * 3] = feature_map[i][3]
+                        non_neighbor[non_neighbor_count][64 * 56 * 2 + 224 * 2 * 3: 64 * 56 * 2 + 224 * 2 * 3 + 64 * 56 * 2 + 224 * 2 * 3] = feature_map[j][2]
                         non_neighbor[non_neighbor_count][-1] = 0
                         non_neighbor_count += 1
 
                         if non_neighbor_count >= data_amount:
                             break
 
-                        non_neighbor[non_neighbor_count][0: 64 * 56 * 2] = feature_map[i][1]
-                        non_neighbor[non_neighbor_count][64 * 56 * 2: 64 * 56 * 2 + 64 * 56 * 2] = feature_map[j][0]
+                        non_neighbor[non_neighbor_count][0: 64 * 56 * 2 + 224 * 2 * 3] = feature_map[i][1]
+                        non_neighbor[non_neighbor_count][64 * 56 * 2 + 224 * 2 * 3: 64 * 56 * 2 + 224 * 2 * 3 + 64 * 56 * 2 + 224 * 2 * 3] = feature_map[j][0]
                         non_neighbor[non_neighbor_count][-1] = 0
                         non_neighbor_count += 1
 
