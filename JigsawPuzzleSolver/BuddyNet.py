@@ -31,6 +31,9 @@ class BuddyNet(nn.Module):
         self.fc6 = nn.Linear(2 * 14 * 16 + 224, 2 * 14 * 16 + 224)
         self.fc7 = nn.Linear(2 * 14 * 16 + 224, 2)
 
+        #self.fc1 = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2 * 28 * 32 + 224 * 3)
+        #self.fc2 = nn.Linear(2 * 28 * 32 + 224 * 3, 2)
+
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -39,6 +42,9 @@ class BuddyNet(nn.Module):
         x = F.relu(self.fc5(x))
         x = F.relu(self.fc6(x))
         x = self.fc7(x)
+
+        #x = F.relu(self.fc1(x))
+        #x = self.fc2(x)
 
         return x
 
@@ -66,7 +72,6 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
             item_amount = 0
 
             # Iterate over data.
-
             for tile in dataloaders[phase]:
                 tile_inputs, tile_labels = tile
                 item_amount = tile_inputs.shape[1]
@@ -119,7 +124,7 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
     return model
 
 
-'''
+
 def LoadData(path, ratio=0.2):
     feature_data = torch.load(path)
     N = int(feature_data.shape[0])
@@ -139,14 +144,14 @@ def LoadData(path, ratio=0.2):
     #    y_val[i][y[i]] = 1
 
     return x_train, y_train, x_val, y_val
-'''
+
 
 
 def main():
     args = parser.parse_args()
     DATA = args.data
 
-    #(x_train, y_train, x_val, y_val) = LoadData(DATA)
+    #(x_train, y_train, x_val, y_val) = LoadData('EdgeFeatures_3')
     #datasets = {'train': TensorDataset(x_train, y_train),
     #            'val': TensorDataset(x_val, y_val)}
 
