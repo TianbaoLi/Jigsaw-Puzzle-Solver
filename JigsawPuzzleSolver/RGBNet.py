@@ -76,7 +76,7 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
 
                     slice_1 = slice_1[:, - 224 * 2 * 3:]
                     slice_2 = slice_2[:, - 224 * 2 * 3:]
-                    input = feature_data = torch.cat((slice_1, slice_2), 0)
+                    inputs = torch.cat((slice_1, slice_2), 1)
 
                     # wrap them in Variable
                     inputs = Variable(inputs.cuda())
