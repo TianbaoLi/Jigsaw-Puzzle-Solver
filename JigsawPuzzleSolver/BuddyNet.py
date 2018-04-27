@@ -22,6 +22,7 @@ class BuddyNet(nn.Module):
 
     def __init__(self):
         super(BuddyNet, self).__init__()
+        self.training = True
         # fcs
         self.fc1 = nn.Linear(2 * (2 * 56 * 64 + 224 * 2 * 3), 2 * 56 * 64 + 224 * 2 * 3)
         self.fc2 = nn.Linear(2 * 56 * 64 + 224 * 2 * 3, 2 * 56 * 64 + 224 * 2 * 3)
@@ -36,8 +37,11 @@ class BuddyNet(nn.Module):
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
+        x = F.dropout(x, training=self.training)
         x = F.relu(self.fc2(x))
+        x = F.dropout(x, training=self.training)
         x = F.relu(self.fc3(x))
+        x = F.dropout(x, training=self.training)
         x = F.relu(self.fc4(x))
         x = F.relu(self.fc5(x))
         x = F.relu(self.fc6(x))
@@ -64,8 +68,10 @@ def train_model(model, dataloaders, dataset_sizes, criterion, optimizer, schedul
             if phase == 'train':
                 scheduler.step()
                 model.train(True) # Set model to training mode
+                model.training = True
             else:
                 model.train(False) # Set model to evaluate mode
+                model.training = True
 
             running_loss = 0.0
             running_corrects = 0
