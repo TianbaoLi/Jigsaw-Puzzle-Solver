@@ -23,11 +23,11 @@ class RGBNet(nn.Module):
     def __init__(self):
         super(RGBNet, self).__init__()
         # fcs
-        self.fc1 = nn.Linear(2 * 224 * 2 * 3, 336)
-        self.fc2 = nn.Linear(336, 100)
-        self.fc3 = nn.Linear(100, 100)
-        self.fc4 = nn.Linear(100, 100)
-        self.fc5 = nn.Linear(100, 2)
+        self.fc1 = nn.Linear(2 * 224 * 2 * 3, 1344)
+        self.fc2 = nn.Linear(1344, 672)
+        self.fc3 = nn.Linear(672, 168)
+        self.fc4 = nn.Linear(168, 42)
+        self.fc5 = nn.Linear(42, 2)
 
 
     def forward(self, x):

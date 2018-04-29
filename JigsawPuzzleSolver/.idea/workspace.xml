@@ -19,7 +19,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="resnet_fmap.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="resnet_fmap.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resnet_fmap.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="822">
@@ -49,6 +49,16 @@
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RGBNet.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/RGBNet.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="252">
+              <caret line="32" column="25" lean-forward="true" selection-start-line="32" selection-start-column="25" selection-end-line="32" selection-end-column="25" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -95,11 +105,11 @@
         <option value="$PROJECT_DIR$/jigsaw_image_loader.py" />
         <option value="$PROJECT_DIR$/FeatureDataset.py" />
         <option value="$PROJECT_DIR$/feature_extractor.py" />
-        <option value="$PROJECT_DIR$/RGBNet.py" />
         <option value="$PROJECT_DIR$/BuddyNet.py" />
         <option value="$PROJECT_DIR$/resnet_fmap_gray.py" />
         <option value="$PROJECT_DIR$/feature_extractor_gray.py" />
         <option value="$PROJECT_DIR$/BuddyNet_grey.py" />
+        <option value="$PROJECT_DIR$/RGBNet.py" />
       </list>
     </option>
   </component>
@@ -307,6 +317,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="63" y="-4" width="1857" height="1084" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13731825" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -670,16 +681,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/RGBNet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2283">
-          <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#12#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/resnet_fmap_gray.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="232">
@@ -728,6 +729,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="822">
           <caret line="102" column="37" lean-forward="true" selection-start-line="102" selection-start-column="37" selection-end-line="102" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RGBNet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="32" column="25" lean-forward="true" selection-start-line="32" selection-start-column="25" selection-end-line="32" selection-end-column="25" />
           <folding />
         </state>
       </provider>
