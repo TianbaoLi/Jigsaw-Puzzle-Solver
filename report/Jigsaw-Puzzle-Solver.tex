@@ -19,7 +19,7 @@
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
-\usepackage{microtype}      % microtypography
+%\usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
 \title{CNN Assistance in Jigsaw Puzzle Solution}
@@ -69,44 +69,116 @@
 
 \begin{abstract}
 
-This paper presents an innovative way to assist solving jigsaw puzzle with the help of deep convolutional neural networks. The main goal of this project is to predict whether two pieces from the jigsaw puzzleshould be neighbors in the origin image. Proceeding from traditional methods of using color (like RGB) diastance, here, we introduce the low level features in the image which are extracted by convolutional neural networks. Compared with color-based solutions, using the feature maps generated can help with a deeper intuition on the correlation between edges. The proposed algorithm can achieve considerable accuracy on adjacency prediction.
+This paper presents an innovative way to assist solving jigsaw puzzle with the help of deep convolutional neural networks. The main goal of this project is to predict whether two pieces from the jigsaw puzzle should be neighbors in the origin image. Proceeding from traditional methods of using color (like RGB) distance, here, we introduce the low level features in the image which are extracted by convolutional neural networks. Compared with color-based solutions, using the feature maps generated can help with a deeper intuition on the correlation between edges. The proposed algorithm can achieve considerable accuracy on adjacency prediction.
 
 \end{abstract}
 
 \section{Introduction}
 
-Jigsaw puzzles were first introduced around 1760 for map research and then became a popular intelligence entertainment \cite{freeman1964apictorial} in the last few centuries. The origin image is divided into $N\times M$. To solve htis, people need to cluster similar tiles, find the neighbors and then reconstruct the origin image. However, due to the possible locations and relationship behind pieces, there are quite a huge number of sulotions ever for a small jigsae puzzle, for example, $(8*8)!=1.2688693*10^{89}$ solutions for an $8*8$ puzzle. Indeed, this problem has be proven to be a NP-complete one \cite{altman1989solving,demaine2007jigsaw}. Though tough, actually, jigsaw puzzle solving is quite meaningful beyond the intelligence challenge. It helps a lot in combining shredded of documents \cite{levin1975computer,marques2009reconstructing} and even recovering artifacts debris\cite{koller2006computer}.
+Jigsaw puzzles were first introduced around 1760 for map research and then became a popular intelligence entertainment \cite{freeman1964apictorial} in the last few centuries. The origin image is divided into $N\times M$. To solve this, people need to cluster similar tiles, find the neighbors and then reconstruct the origin image. However, due to the possible locations and relationship behind pieces, there are quite a huge number of solutions ever for a small jigsaw puzzle, for example, $(8*8)!=1.2688693*10^{89}$ solutions for an $8*8$ puzzle. Indeed, this problem has be proven to be a NP-complete one \cite{altman1989solving,demaine2007jigsaw}. Though tough, actually, jigsaw puzzle solving is quite meaningful beyond the intelligence challenge. It helps a lot in combining shredded of documents \cite{levin1975computer,marques2009reconstructing} and even recovering artifacts debris\cite{koller2006computer}.
 
-Recently year, there have been a lot researchers working on this problem and achieved much progress. However, one the the most important sub-problems in this procedure, determining adjancency between pieces, seems keeps in the same track for long. When people solve the puzzle manually, they need needs image information at edges, such as color, texture, instance, etc. to make the judgement whether two pieces are neighbors. However, most of previous research only eyes on the color features such as RGB distance. This make such solutions quite bad for simple-colored images, especially in reconstructing printed documents ot ancient artifacts.
+Recently year, there have been a lot researchers working on this problem and achieved much progress. However, one the the most important sub-problems in this procedure, determining adjacency between pieces, seems keeps in the same track for long. When people solve the puzzle manually, they need needs image information at edges, such as color, texture, instance, etc. to make the judgment whether two pieces are neighbors. However, most of previous research only eyes on the color features such as RGB distance. This make such solutions quite bad for simple-colored images, especially in reconstructing printed documents of ancient artifacts.
 
-Here, we want to mimic how people really solve jigsaw puzzles and work on finding features capable to help make adjancent prediction. Recently, Concolution Neural Networks (CNN) leads the research area of computer vision with its capability of extracting inside features underneath the images and sole hard problems such as detection\cite{redmon2017yolo9000} and segmentation\cite{he2017mask,yu2015multi}. Based on the existing tremendous structures, people start to apply transfer learning and use extracted features to solve related computer vision problems\cite{razavian2014cnn}.
+Here, we want to mimic how people really solve jigsaw puzzles and work on finding features capable to help make adjacent prediction. Recently, Convolution Neural Networks (CNN) leads the research area of computer vision with its capability of extracting inside features underneath the images and sole hard problems such as detection\cite{redmon2017yolo9000} and segmentation\cite{he2017mask,yu2015multi}. Based on the existing tremendous structures, people start to apply transfer learning and use extracted features to solve related computer vision problems\cite{razavian2014cnn}.
 
-In this paper, we contribute in providing neural networks to predict whether two tiles from a jigsaw puzzle are adjancent in the origin image. The neural networks judge the jigsaw piece pair by extracted low lever image features from pre-trained CNN together with color information at edges, and outputs whether this two tiles are neighbors. This model achieves outstanding prediction accuracy in images from ILSVRC2012 dataset\cite{ILSVRC15}.
+In this paper, we contribute in providing neural networks to predict whether two tiles from a jigsaw puzzle are adjacent in the origin image. The neural networks judge the jigsaw piece pair by extracted low lever image features from pre-trained CNN together with color information at edges, and outputs whether this two tiles are neighbors. This model achieves outstanding prediction accuracy in images from ILSVRC2012 dataset\cite{ILSVRC15}.
 
 \section{Related Work}
 
-Jigsaw has been researched on for many years. One most basic idea is to evaluate the compatibility of the adjacent pieces and take a strategy, such as greedy search, to arrange the pieces. One famous work is the Genetic Algorithm (GA) \cite{sholomon2013genetic}. Given initial candidate solutions, it applies operations like selection, reproduction and mutation based on the color-distance fitness function. Similarly but innovatively, \cite{sholomon2016dnn} first introduces deep neural network to jigsaw solver and transforms the puzzle to the piece pair adjacency prediction. It samples piece edges to learn the adjacent likelihood through DNN based on the color distance. For these two solvers, they only use color information to judge whether two pieces should be together. However, human use some others like texture to solve. Also, though high accuracy, these solution could not solve the jigsaw puzzle whici generated by single-colored or colerless images. So, there are still some further steps on it.
+Jigsaw has been researched on for many years. One most basic idea is to evaluate the compatibility of the adjacent pieces and take a strategy, such as greedy search, to arrange the pieces. One famous work is the Genetic Algorithm (GA) \cite{sholomon2013genetic}. Given initial candidate solutions, it applies operations like selection, reproduction and mutation based on the color-distance fitness function. Similarly but innovative, \cite{sholomon2016dnn} first introduces deep neural network to jigsaw solver and transforms the puzzle to the piece pair adjacency prediction. It samples piece edges to learn the adjacent likelihood through DNN based on the color distance. For these two solvers, they only use color information to judge whether two pieces should be together. However, human use some others like texture to solve. Also, though high accuracy, these solution could not solve the jigsaw puzzle which generated by single-colored or colorless images. So, there are still some further steps on it.
 
 Recently, with the prosper of convolutional neural networks in computer vision area, convolutional neural networks (CNN) also becomes a good tool to solve jigsaw puzzles. Because of the fact that a good CNN is hard to train and the training data needs many images and well labels, more and more researchers choose the apply transfer learning on pre-trained models, fine turning on the last a few layers or using it as a feature extractor, instead of go over all the process \cite{razavian2014cnn}. CNN can extract regional features in many perspectives, such as color, texture, pattern, instance. Features in the formers usually reflect the basic information of the images, while the latter layers can make high-level judgement. These can be good inference for judging adjacent pieces. So, \cite{deryneural,noroozi2016unsupervised} choose to use feature maps from pre-trained CFN \cite{noroozi2016unsupervised} (siamese-ennead AlexNet \cite{krizhevsky2012imagenet}), VGG \cite{he2016deep} or Resnet \cite{simonyan2014very} and predict the location. However, the main problem for these approach is that they hold a siamese structure with shared weights for each location, which means they can only solve a limited number for pieces ($3\times3$ in \cite{noroozi2016unsupervised}, $2\times2$ and $2\times3$ in \cite{deryneural}). With the piece amount increasing, the network becomes extremely heavy to train.
 
-\section{preliminary}
+\section{Preliminary}
 
 \subsection{Problem Definition}
 
-Jigsaw puzzles aims to reshape multiple non-overlapping pieces from the origin image to the correct arrangement. In our project, like in most computer research, we focus on equal-sized squared $W=N\times M$ pieces. It refuses the aid of shape matching but asks for more on image information. The expected result is a set of indexes $I=(p_1,p_2,\dots,p_W)$ which $p_i$ is the corresponding index for each piece in the origin image. For the worst case, it takes the complicity of $O(W!)$. For example, Figure~\ref{fig:jigsawpuzzleexample} is a $3*3$ jigsaw puzzle. The left subgraph is the origin image, and the right subgraph is the puzzle which $I=\{6,2,7,3,5,4,0,8,1\}$.
+Jigsaw puzzles aims to reshape multiple non-overlapping pieces from the origin image to the correct arrangement. In our project, like in most computer research, we focus on equal-sized squared $W=N\times M$ pieces. It refuses the aid of shape matching but asks for more on image information. The expected result is a set of indexes $I=(p_1,p_2,\dots,p_W)$ which $p_i$ is the corresponding index for each piece in the origin image. For the worst case, it takes the complicity of $O(W!)$. For example, Figure~\ref{fig:colorfuljigsawpuzzle} is a $3*3$ jigsaw puzzle. The left subgraph is the origin image, and the right subgraph is the puzzle which $I=\{6,2,7,3,5,4,0,8,1\}$.
 
 \begin{figure}
-  \begin{minipage}{.50\textwidth}
-    \centering
-    \includegraphics[width=2.5in]{origin_color}
-  \end{minipage}
-  \begin{minipage}{.50\textwidth}
-    \centering
-    \includegraphics[width=2.5in]{puzzle_color}
-  \end{minipage}
-  \caption{Jigsaw Puzzle Example}
-  \label{fig:jigsawpuzzleexample}
+    \begin{minipage}{\textwidth}
+        \begin{minipage}{.49\textwidth}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{origin_color}
+            \end{minipage}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{puzzle_color}
+            \end{minipage}
+            \caption{Colorful Jigsaw Puzzle Example}
+            \label{fig:colorfuljigsawpuzzle}
+        \end{minipage}
+        \begin{minipage}{.49\textwidth}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{origin_black}
+            \end{minipage}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{puzzle_black}
+            \end{minipage}
+            \caption{Black Jigsaw Puzzle Example}
+            \label{fig:blackjigsawpuzzle}
+        \end{minipage}
+    \end{minipage}
+    \begin{minipage}{\textwidth}
+        \begin{minipage}{.49\textwidth}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{origin_blue}
+            \end{minipage}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{puzzle_blue}
+            \end{minipage}
+            \caption{Blue Jigsaw Puzzle Example}
+            \label{fig:bluejigsawpuzzle}
+        \end{minipage}
+        \begin{minipage}{.49\textwidth}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{origin_texure}
+            \end{minipage}
+            \begin{minipage}{.49\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{puzzle_texure}
+            \end{minipage}
+            \caption{Textural Jigsaw Puzzle Example}
+            \label{fig:texurejigsawpuzzle}
+        \end{minipage}
+    \end{minipage}
 \end{figure}
+
+\subsection{Motivation}
+
+Starting from the idea in \cite{sholomon2016dnn}, instead of solving the jigsaw puzzle from the from to the end, we choose to focus on the prediction whether two jigsaw puzzle tile should be neighbor in the origin image. In recent research, nearly all of the researchers decide to use color information to judge whether two tiles are adjacent. And as in the result, the color distance like RGB distance appears as a good measurement. In some work\cite{sholomon2013genetic} the color distance is defined as the sum of squared color differences in three-dimensional color space like RGB. For image piece $x_i$ and $x_j$ as a $K\times K\times 3$ matrix which $K$ is the edge length and $cb$ is the color band, the distance is
+$$
+D(x_i,x_j,r)=\sqrt[]{\sum^K_{k=1}\sum^3_{cb=1}(x_i(k,K,cb)-x_j(k,1,cb))^2}
+$$
+
+However, this color-based measurement doesn't work all the time. For example, in Figure~\ref{fig:blackjigsawpuzzle}, RGB-based can not predict the similarity of gray-scaled images. Also even changed it to gray-level distance, it doesn't work so well. Also, like in Figure~\ref{fig:bluejigsawpuzzle}, even in RGB band, main part of the image is in color blue, even all blue pixels in some edges. So the distances are so close for all edge pairs, which can leads to high error rate for the prediction. Moreover, for the images of furs, hairs and others with obvious pattern structure, like in Figure~\ref{fig:texurejigsawpuzzle}, it is easy to have a low distance with the displacement fitting the pattern though it is wrong. Only color information can not have a good result on this.
+
+Here, we combine the features extracted from Resnet34\cite{he2016deep}. Usually, people choose the extract the feature maps after the activation functions which contains much image information such as color, texture and so on. Resnet34 is constructed on the structure of BasicBlock (several layers of convolutions, batch normalization, ReLUs, etc) and can skip some of the blocks to achieve the residual learning with more blocks. Resnet34 has 3, 4, 6 and 3 blocks in each section. There are some discussions in \cite{noroozi2016unsupervised} that feature maps from low layers of CNN can help with solving the jigsaw puzzle better. In our algorithm, we choose to use the ReLU output after the first block.
+
+Combining the measurements above, the goal of the algorithm is to build the neural networks based classifier to predict the adjacent likelihood of a pair of two jigsaw puzzle edges in the origin image. Note that not all pixels help with the prediction near the edge, we only use the feature maps and color value for the two rows near the edge to reduce the work load of the neural networks.
+
+\section{BuddyNet}
+
+In this section, we will discuss the neural network structure, BuddyNet. It is a NN classifier which predicts the adjacency likelihood of a pair of jigsaw tiles in the origin image.
+
+
+
+\section{RGBNet}
+
+
+
+\section{Evaluation}
+
+\subsection{Dataset}
+
+For a jigsaw puzzle with $N$ pieces each edge,
+
 
 
 \bibliographystyle{plain}
