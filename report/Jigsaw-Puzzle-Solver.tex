@@ -177,7 +177,9 @@ In this section, we will discuss the neural network structure, BuddyNet. It is a
 
 \subsection{Dataset}
 
-For a jigsaw puzzle with $N$ pieces each edge,
+For a jigsaw puzzle with $N$ pieces each edge, there are $N*N$ pieces in total and $(N*N)!$ possible combinations of piece pairs, and only $2*N*(N-1)$ among them hold the positive label (actually adjacent in the origin image). Note that we do not consider rotations by now. To reduce the infuence caused by data incline, we only sample $2*N*(N-1)$ pairs from the negative-labelled set (not adjacent ones) to keep a balanced dataset.
+
+
 
 
 
