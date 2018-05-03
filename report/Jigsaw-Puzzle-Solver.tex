@@ -157,7 +157,7 @@ $$
 D(x_i,x_j,r)=\sqrt[]{\sum^K_{k=1}\sum^3_{cb=1}(x_i(k,K,cb)-x_j(k,1,cb))^2}
 $$
 
-However, this color-based measurement doesn't work all the time. For example, in Figure~\ref{fig:blackjigsawpuzzle}, RGB-based can not predict the similarity of gray-scaled images. Also even changed it to gray-level distance, it doesn't work so well. Also, like in Figure~\ref{fig:bluejigsawpuzzle}, even in RGB band, main part of the image is in color blue, even all blue pixels in some edges. So the distances are so close for all edge pairs, which can leads to high error rate for the prediction. Moreover, for the images of furs, hairs and others with obvious pattern structure, like in Figure~\ref{fig:texurejigsawpuzzle}, it is easy to have a low distance with the displacement fitting the pattern though it is wrong. Only color information can not have a good result on this.
+However, this color-based measurement doesn't work all the time. For example, in Figure~\ref{fig:blackjigsawpuzzle}, RGB-based can not predict the similarity of grey-scaled images. Also even changed it to grey-level distance, it doesn't work so well. Also, like in Figure~\ref{fig:bluejigsawpuzzle}, even in RGB band, main part of the image is in color blue, even all blue pixels in some edges. So the distances are so close for all edge pairs, which can leads to high error rate for the prediction. Moreover, for the images of furs, hairs and others with obvious pattern structure, like in Figure~\ref{fig:texurejigsawpuzzle}, it is easy to have a low distance with the displacement fitting the pattern though it is wrong. Only color information can not have a good result on this.
 
 Here, we combine the features extracted from Resnet34\cite{he2016deep}. Usually, people choose the extract the feature maps after the activation functions which contains much image information such as color, texture and so on. Resnet34 is constructed on the structure of BasicBlock (several layers of convolutions, batch normalization, ReLUs, etc) and can skip some of the blocks to achieve the residual learning with more blocks. Resnet34 has 3, 4, 6 and 3 blocks in each section. There are some discussions in \cite{noroozi2016unsupervised} that feature maps from low layers of CNN can help with solving the jigsaw puzzle better. In our algorithm, we choose to use the ReLU output after the first block.
 
@@ -169,12 +169,12 @@ Combining the measurements above, the goal of the algorithm is to build the neur
 
 In this section, we will discuss the neural network structure, BuddyNet. It is a NN classifier which predicts the adjacency likelihood of a pair of jigsaw tiles in the origin image.
 
-As mentioned in the motivation, we want to extract low level features in Restnet34\cite{he2016deep}. Restnet34 has the structure of a combination of basic blocks as in Figure~\ref{fig:basicblock}. To extract features for each piece, we first resize it into the shape of $224\times 224$, which is the expected input size of Resnet34. After one convolotional layer of $7\times7$, the data is passed through the first basic block and output 64 feature maps which has the size of $56\times 56$. One example is shown as in Figure~\ref{fig:featuremapexample}. 64 small images on the right side are the feature maps of the piece on the left. We can see that some feature maps focus on different regions (the from object or the background), together with some others with more concentration on the shape and other content. To build the connection near the edges, we extract the two rows of pixels near the edge. In this way, we have $2\times 56\times 64=7168$ values to express the edge.
+As mentioned in the motivation, we want to extract low level features in Resnet34\cite{he2016deep}. Resnet34 has the structure of a combination of basic blocks as in Figure~\ref{fig:basicblock}. To extract features for each piece, we first resize it into the shape of $224\times 224$, which is the expected input size of Resnet34. After one convolotional layer of $7\times7$, the data is passed through the first basic block and output 64 feature maps which has the size of $56\times 56$. One example is shown as in Figure~\ref{fig:featuremapexample}. 64 small images on the right side are the feature maps of the piece on the left. We can see that some feature maps focus on different regions (the from object or the background), together with some others with more concentration on the shape and other content. To build the connection near the edges, we extract the two rows of pixels near the edge. In this way, we have $2\times 56\times 64=7168$ values to express the edge.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{basicblock}
-    \caption{Basic Block of RestNet34}
+    \caption{Basic Block of Resnet34}
     \label{fig:basicblock}
 \end{figure}
 
@@ -214,7 +214,7 @@ As used in many popular solutions, RGB distance has fairly good result in neighb
 
 Instead of training Resnet34 for a huge amount of time, here we choose to use the pre-trained in the version of PyTorch\footnote{\url{https://download.pytorch.org/models/resnet34-333f7ec4.pth}}. Other neural networks are also implemented by PyTorch\footnote{\url{https://www.pytorch.org/}}. The Resnet34 models above is pre-trained on ImageNet\cite{krizhevsky2012imagenet} to learn the general expression of images.. To make the evaluation result more persuable, we seperate ImageNet validation set into training and validation set for this project.
 
-The ImageNet validation set has 51003 images in total. The image sizes differ, so we apply random crop on this to $224\times224$. Next, each image is divided into tiles. In this evaluation, we try on $3\times3$ with edge length of 75 pixels and $8\times8$ with edge length of 28 pixels. Then we pass pieces through Restnet34, get the feature maps and generate the vector mentioned above together with RGB bands.
+The ImageNet validation set has 51003 images in total. The image sizes differ, so we apply random crop on this to $224\times224$. Next, each image is divided into tiles. In this evaluation, we try on $3\times3$ with edge length of 75 pixels and $8\times8$ with edge length of 28 pixels. Then we pass pieces through Resnet34, get the feature maps and generate the vector mentioned above together with RGB bands.
 
 \subsection{Data Sampling}
 
@@ -224,14 +224,40 @@ In the end, we obtain balanced datasets of 100000 pairs for $3\times 3$ puzzle a
 
 \subsection{Experiment Results}
 
-In this section, we will give out the experiment result on changing different parameters, and analyze how the algorithms work and why is like that. The experiment results are shown in Table~\ref{tab:exp}.
+In this section, we will give out the experiment result on changing different parameters, and analyze how the algorithms work and why is like that.
 
+\textbf{algorithm}
 
+The comparision on different algorithms are shown in Table~\ref{tab:expalg}. From the table we can see that the algorithms based on by bands only surpasses out proposed BuddyNet with a margin. And out revised one has a little higher accuracy than DNN\_Buddies\cite{sholomon2016dnn}.
+
+Actually, there are only 4916 neurons in the archetichure but 23298 in the proposed BuddyNet. The structure is much more complicated than those and requires more training data to overcome underfitting. Also, we can see that there is stilla largin margin between training accuracy and validation accuracy for BuddyNet, more data can help.
 
 \begin{table}
-    \caption{Experiemtn Results}
+    \caption{Experiement Results on Different Algorithms}
     \centering
-    \label{tab:exp}
+    \label{tab:expalg}
+    \begin{tabular}{c|c|c|c|c}
+        \hline
+        & data amount & pieces & training accuracy & validation accuracy\\
+        \hline
+        BuddyNet & 10000 & $3\times 3$ & 0.9546 & 0.9395\\
+        \hline
+        RGBNet & 10000 & $3\times 3$ & 0.9904 & 0.9861\\
+        \hline
+        \hline
+        DNN-Buddies \cite{sholomon2016dnn} & 10000 & $3\times 3$ & 0.9858 & 0.9846\\
+        \hline
+    \end{tabular}
+\end{table}
+
+\textbf{data amount}
+
+The comparision on different training data sizes are shown in Table~\ref{tab:expamount}. From the table we can see that more training data help the models achieve a better result on accuracy, especially for BuddyNet with a complicated structure as discussed above. Also, the existing margin between training accuracy and validation shows there is still potential for BuddyNet.
+
+\begin{table}
+    \caption{Experiement Results on Different Training Data Sizes}
+    \centering
+    \label{tab:expamount}
     \begin{tabular}{c|c|c|c|c}
         \hline
         & data amount & pieces & training accuracy & validation accuracy\\
@@ -244,6 +270,25 @@ In this section, we will give out the experiment result on changing different pa
         \hline
         RGBNet & 100000 & $3\times 3$ & 0.9976 & 0.9947\\
         \hline
+    \end{tabular}
+\end{table}
+
+\textbf{pieces}
+
+The comparision on different piece amounts on each edge are shown in Table~\ref{tab:exppiece}. From the table we can see that prediction on $3\times 3$ pieces (edge length of 75) is better than $8\times 8$ (edge length of 28) from the same size of the origin image. This is easy to understand because the feature maps and RGB bands we use are all in the pixel level. Fewer pixels means less information we have, leading to worse prediction. So, for the low resolution pieces, applying super resolution methods before passing through Resnet34 may help work better.
+
+\begin{table}
+    \caption{Experiement Results on Different piece amounts}
+    \centering
+    \label{tab:exppiece}
+    \begin{tabular}{c|c|c|c|c}
+        \hline
+        & data amount & pieces & training accuracy & validation accuracy\\
+        \hline
+        BuddyNet & 10000 & $3\times 3$ & 0.9546 & 0.9395\\
+        \hline
+        RGBNet & 10000 & $3\times 3$ & 0.9904 & 0.9861\\
+        \hline
         BuddyNet & 10000 & $8\times 8$ & 0.9277 & 0.8945\\
         \hline
         RGBNet & 10000 & $8\times 8$ & 0.9488 & 0.9301\\
@@ -251,15 +296,24 @@ In this section, we will give out the experiment result on changing different pa
     \end{tabular}
 \end{table}
 
+\textbf{color}
 
+The result of grey-scaled BuddyNet are shown in Table~\ref{tab:expgrey}. We the use BuddyNet which only accepts feature maps as from Resnet34. From the table we can see that the accuracy is fairly good since grey-scaled jigswa puzzle is impossible for RGB-based solutions.
 
-
-
-
-
-
-
-
+\begin{table}
+    \caption{Experiement Results on Grey-scaled Images}
+    \centering
+    \label{tab:expgrey}
+    \begin{tabular}{c|c|c|c|c}
+        \hline
+        & data amount & pieces & training accuracy & validation accuracy\\
+        \hline
+        BuddyNet\_grey & 10000 & $3\times 3$ & 0.8142 & 0.7693\\
+        \hline
+        BuddyNet\_grey & 100000 & $3\times 3$ & 0.8430 & 0.8085\\
+        \hline
+    \end{tabular}
+\end{table}
 
 
 \bibliographystyle{plain}
