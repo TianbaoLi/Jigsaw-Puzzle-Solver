@@ -22,7 +22,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
-\title{CNN Assistance in Jigsaw Puzzle Solution}
+\title{CNN Assistance in Jigsaw Puzzle Solver}
 
 % The \author macro works with any number of authors. There are two
 % commands used to separate the names and addresses of multiple
@@ -220,7 +220,7 @@ The ImageNet validation set has 51003 images in total. The image sizes differ, s
 
 For a jigsaw puzzle with $N$ pieces each edge, there are $N*N$ pieces in total and $(N*N)!$ possible combinations of piece pairs. However, only $2*N*(N-1)$ among them hold the positive label (actually adjacent in the origin image). Note that we do not consider rotated pieces by now. For the algorithm traing a classifier, it is extremely important to sample randomly and uniformly. If using the data above, classifying by giving prediction of ``false'' can get a high accuracy but low recall, not the classifier we want. To reduce the infuence caused by data inclining, we only sample $2*N*(N-1)$ pairs from the negative-labelled set (not adjacent ones) to keep a balanced dataset whose size is $4*N*(N-1)$.
 
-In the end, we obtain balanced datasets of 100000 pairs for $3\times 3$ puzzle and 10000 pairs for  $8\times 8$ puzzle. We train the forward neural networks with Stochastic Gradient Descent to minimize the cross-entropy loss for 200 iterations and apply dropout (ratio = 0.5) for BuddyNet.
+In the end, we obtain balanced datasets of 100000 pairs for $3\times 3$ puzzle and 10000 pairs for  $8\times 8$ puzzle. We train the forward neural networks with Stochastic Gradient Descent with a momentum of 0.9 to minimize the cross-entropy loss for 200 iterations and apply dropout (ratio = 0.5) for BuddyNet. We use an initial learning rate of 0.1, and is decayed by a factor of 0.3 every 25 epochs. The default batch size is 32.
 
 \subsection{Experiment Results}
 
@@ -314,6 +314,20 @@ The result of grey-scaled BuddyNet are shown in Table~\ref{tab:expgrey}. We the 
         \hline
     \end{tabular}
 \end{table}
+
+\section{Additional Trials and Future Work}
+
+Besides the achievements above, during this project, we also attempt to contribute and evaluate in some other aspects. These points out where the potential research is going:
+
+\begin{itemize}
+    \item We attempt to build an end-to-end jigsaw puzzle solver using reinforcement learning and deep Q-learning. We try to transform the outputs of BuddyNet and RGBNet into a float value of likelihood, and use it as the reward for each operation in the policy search. However, the main problem is that randomly sampling among the avaliable pieces and learning the policy by keeping trying to solve is in highly computional cost. When there is many pieces in one puzzle, this kind of solution seems impossible. One idea here is to do clustering among all edges and build a edge-graph using the relationship of same piece edges and neighbor edges. Some graph algorithm like spanning tree or minimum cutting could help. Also, traditional solutions use greedy searching or genetic algorithm and try to improve the initial proposal inseveral epochs. The classifiers we proposed can also be integrated in there algorithms to improve end-to-end solvers.
+    \item As mentioned in \cite{masters2018revisiting}, we make some exploration on the batch size. It seems true that training by smaller size of batch (like 32) can get better result easier and more quickly. Trying to use batch of 1024 or 2048 items, we find that it keeps on pretty low validation accuracy (55\% to 60\%) for many epochs. And it usually converges at a local minima with a bad result. More digging on training batch sizes can not only achieve better validation accuracy, but also help fully understand the machanism behind the black boxes of ddep learning.
+    \item Our proposed methods, by now, can not achieve a pretty high prediction accuracy for smaller pieces of jigsaw puzzles. Fewer pixels  and less information on each edge hurts the result much a lot. Some more research could be on whether puzzle-piece super resolution can help on this.
+    \item Grey-scaled jigsaw has a lot of use cases in real work, including but no limited to archaeology, literature and criminal cases. From out first solvers on single-colored or colorless jigsaw puzzles, more methods aiming to solving the jigsaw puzzle based on its inside proporties are in great desired.
+\end{itemize}
+
+\section{Conclusion}
+
 
 
 \bibliographystyle{plain}
