@@ -163,7 +163,9 @@ Here, we combine the features extracted from Resnet34\cite{he2016deep}. Usually,
 
 Combining the measurements above, the goal of the algorithm is to build the neural networks based classifier to predict the adjacent likelihood of a pair of two jigsaw puzzle edges in the origin image. Note that not all pixels help with the prediction near the edge, we only use the feature maps and color value for the two rows near the edge to reduce the work load of the neural networks.
 
-\section{BuddyNet}
+\section{Adjacency Prediction Algorithms}
+
+\subsection{BuddyNet}
 
 In this section, we will discuss the neural network structure, BuddyNet. It is a NN classifier which predicts the adjacency likelihood of a pair of jigsaw tiles in the origin image.
 
@@ -182,7 +184,7 @@ As mentioned in the motivation, we want to extract low level features in Restnet
         \includegraphics[width=\textwidth]{fmp_origin}
     \end{minipage}
     \hfill
-    \begin{minipage}{.59\textwidth}
+    \begin{minipage}{.65\textwidth}
         \includegraphics[width=\textwidth]{fmp}
     \end{minipage}
     \caption{Feature Map Example}
@@ -202,18 +204,25 @@ To predict the adjacent likelihood, we integrate the information above and build
 
 Additionly, to test how our proposed neural network works for grey-scaled images, we change the architecture into a new version without integrating RGB information. This network takes a vector with size of $2*7168=14336$ as the input, and hidden layers have 7168, 7168, 1792, 1792, 448, 448, and 2 neurons. Other parameters are just the same as previous BuddyNet.
 
-\section{RGBNet}
+\subsection{RGBNet}
 
 As used in many popular solutions, RGB distance has fairly good result in neighbor piece prediction. Here, to test the capability of expressing the image, we also build a forward neural network only using RGB value. The structure is similar to the one in \cite{sholomon2016dnn}, but we make some revision to achieve a higher accuracy. This RGBNet has 6 fully conencted layers, which the amounts of neurons are 2688, 1344, 672, 168, 42, and 2.
 
 \section{Evaluation}
 
-\subsection{Data Preprocessing}
+\subsection{Pre-trained Model and Dataset}
+
+Instead of training Resnet34 for a huge amount of time, here we choose to use the pre-trained in the version of PyTorch\footnote{\url{https://download.pytorch.org/models/resnet34-333f7ec4.pth}}. Other neural networks are also implemented by PyTorch\footnote{\url{https://www.pytorch.org/}}. The Resnet34 models above is pre-trained on ImageNet\cite{krizhevsky2012imagenet} to learn the general expression of images.. To make the evaluation result more persuable, we seperate ImageNet validation set into training and validation set for this project.
+
+The ImageNet validation set has 51003 images in total. The image sizes differ, so we apply random crop on this to $224\times224$. Next, each image is divided into tiles. In this evaluation, we try on $3\times3$ with edge length of 75 pixels and $8\times8$ with edge length of 28 pixels. Then we pass pieces through Restnet34, get the feature maps and generate the vector mentioned above together with RGB bands.
+
+\subsection{Data Sampling}
 
 For a jigsaw puzzle with $N$ pieces each edge, there are $N*N$ pieces in total and $(N*N)!$ possible combinations of piece pairs. However, only $2*N*(N-1)$ among them hold the positive label (actually adjacent in the origin image). Note that we do not consider rotated pieces by now. For the algorithm traing a classifier, it is extremely important to sample randomly and uniformly. If using the data above, classifying by giving prediction of ``false'' can get a high accuracy but low recall, not the classifier we want. To reduce the infuence caused by data inclining, we only sample $2*N*(N-1)$ pairs from the negative-labelled set (not adjacent ones) to keep a balanced dataset whose size is $4*N*(N-1)$.
 
+In the end, we obtain balanced datasets of 100000 pairs for $3\times 3$ puzzle and 10000 pairs for  $8\times 8$ puzzle. We train the forward neural networks with Stochastic Gradient Descent to minimize the cross-entropy loss for 200 iterations and apply dropout (ratio = 0.5) for BuddyNet.
 
-
+\subsection{Experiment Results}
 
 
 \bibliographystyle{plain}
