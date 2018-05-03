@@ -224,6 +224,43 @@ In the end, we obtain balanced datasets of 100000 pairs for $3\times 3$ puzzle a
 
 \subsection{Experiment Results}
 
+In this section, we will give out the experiment result on changing different parameters, and analyze how the algorithms work and why is like that. The experiment results are shown in Table~\ref{tab:exp}.
+
+
+
+\begin{table}
+    \caption{Experiemtn Results}
+    \centering
+    \label{tab:exp}
+    \begin{tabular}{c|c|c|c|c}
+        \hline
+        & data amount & pieces & training accuracy & validation accuracy\\
+        \hline
+        BuddyNet & 10000 & $3\times 3$ & 0.9546 & 0.9395\\
+        \hline
+        BuddyNet & 100000 & $3\times 3$ & 0.9912 & 0.9749\\
+        \hline
+        RGBNet & 10000 & $3\times 3$ & 0.9904 & 0.9861\\
+        \hline
+        RGBNet & 100000 & $3\times 3$ & 0.9976 & 0.9947\\
+        \hline
+        BuddyNet & 10000 & $8\times 8$ & 0.9277 & 0.8945\\
+        \hline
+        RGBNet & 10000 & $8\times 8$ & 0.9488 & 0.9301\\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
 
 \bibliographystyle{plain}
 \bibliography{Jigsaw-Puzzle-Solver}
